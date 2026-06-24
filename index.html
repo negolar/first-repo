@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A股智能研判：输入股票代码或公司名，快速生成研究结论、风险提示与投资建议。"
+    />
+    <title>A股智能研判</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="A股智能研判首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <path d="M6 23.5 13.2 16l4.7 4.8L26 8.5" />
+              <path d="M6 8h20v16H6z" />
+            </svg>
+          </span>
+          <span>A股智能研判</span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a class="active" href="#">首页</a>
+          <a href="#factors">因子模型</a>
+          <a href="#history">分析记录</a>
+          <a href="#disclaimer">风险提示</a>
+        </nav>
+        <div class="top-search" aria-label="全站搜索">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m16.5 16.5 4 4" />
+          </svg>
+          <span>搜索股票 / 指数 / 资讯</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="workspace" aria-label="股票分析工作台">
+          <aside class="side-panel">
+            <div class="panel-section">
+              <h1>股票分析</h1>
+              <p class="muted">输入 A 股股票代码或公司名，约 1 秒内返回研究结论。</p>
+              <form class="analyze-form" id="analyzeForm">
+                <label class="field-label" for="stockInput">输入股票代码或公司名</label>
+                <div class="input-row">
+                  <div class="input-wrap">
+                    <input
+                      id="stockInput"
+                      name="stock"
+                      type="text"
+                      autocomplete="off"
+                      placeholder="例如：600519 或 贵州茅台"
+                      aria-describedby="inputHelp"
+                    />
+                    <button class="icon-button" id="clearInput" type="button" aria-label="清空输入">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m6 6 12 12M18 6 6 18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <button class="primary-button" id="analyzeButton" type="submit">
+                    <span>开始分析</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
+                <p id="inputHelp" class="helper-text">支持沪深京 A 股代码与常见公司简称。</p>
+              </form>
+              <div class="quick-list" aria-label="热门搜索">
+                <p>热门搜索</p>
+                <button type="button" data-query="600519">贵州茅台 600519</button>
+                <button type="button" data-query="300750">宁德时代 300750</button>
+                <button type="button" data-query="601318">中国平安 601318</button>
+                <button type="button" data-query="600036">招商银行 600036</button>
+              </div>
+            </div>
+
+            <div class="panel-section info-list">
+              <h2>分析说明</h2>
+              <article>
+                <span class="info-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                </span>
+                <div>
+                  <h3>快速研判</h3>
+                  <p>本地模型即时计算，目标响应时间低于 1 秒。</p>
+                </div>
+              </article>
+              <article>
+                <span class="info-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 19V5" />
+                    <path d="M4 19h16" />
+                    <path d="m7 15 4-4 3 3 5-7" />
+                  </svg>
+                </span>
+                <div>
+                  <h3>多维评分</h3>
+                  <p>综合趋势、估值、基本面、资金面、情绪与流动性。</p>
+                </div>
+              </article>
+              <article>
+                <span class="info-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3 5 6v6c0 4.5 2.8 7.9 7 9 4.2-1.1 7-4.5 7-9V6z" />
+                    <path d="m9 12 2 2 4-5" />
+                  </svg>
+                </span>
+                <div>
+                  <h3>风险提示</h3>
+                  <p>输出侧重辅助决策，不承诺收益，不替代独立判断。</p>
+                </div>
+              </article>
+              <article>
+                <span class="info-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 3h8l4 4v14H7z" />
+                    <path d="M15 3v5h5" />
+                    <path d="M10 13h6M10 17h4" />
+                  </svg>
+                </span>
+                <div>
+                  <h3>数据来源</h3>
+                  <p>当前内置样本与启发式估算，后续可接行情与财报接口。</p>
+                </div>
+              </article>
+            </div>
+          </aside>
+
+          <section class="result-area">
+            <div class="loading-banner" id="loadingBanner" hidden>
+              <span class="spinner" aria-hidden="true"></span>
+              <span>正在整合多维指标，预计用时 &lt; 1 秒</span>
+            </div>
+
+            <article class="quote-card">
+              <div class="quote-head">
+                <div>
+                  <p class="eyebrow">当前标的</p>
+                  <h2><span id="stockName">贵州茅台</span> <span id="stockCode">600519</span></h2>
+                  <p class="muted">
+                    <span id="stockMarket">沪A</span> · <span id="stockIndustry">白酒</span> ·
+                    <span id="analysisTime">--</span>
+                  </p>
+                </div>
+                <button class="ghost-button" id="saveButton" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4 14.5 9l5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 9z" />
+                  </svg>
+                  加入观察
+                </button>
+              </div>
+
+              <div class="market-strip">
+                <div class="price-block">
+                  <strong id="stockPrice">1,652.30</strong>
+                  <span id="stockChange" class="up">+0.78%</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>估值</dt>
+                    <dd id="stockPe">22.1x</dd>
+                  </div>
+                  <div>
+                    <dt>ROE</dt>
+                    <dd id="stockRoe">28.68%</dd>
+                  </div>
+                  <div>
+                    <dt>换手率</dt>
+                    <dd id="stockTurnover">0.12%</dd>
+                  </div>
+                  <div>
+                    <dt>流动性</dt>
+                    <dd id="stockLiquidity">高</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+
+            <div class="summary-grid">
+              <article class="summary-card conclusion-card">
+                <div>
+                  <h2>研究结论</h2>
+                  <p id="conclusionText">
+                    公司基本面稳健，盈利能力优势明显，估值处于历史中等偏低位置，短期趋势偏强。
+                  </p>
+                  <p class="freshness">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M13 2 4 14h7l-1 8 10-13h-7z" />
+                    </svg>
+                    <span id="elapsedTime">预计用时 &lt; 1 秒</span>
+                  </p>
+                </div>
+                <div class="score-ring" aria-label="综合评分">
+                  <svg viewBox="0 0 140 140">
+                    <circle class="ring-bg" cx="70" cy="70" r="54" />
+                    <circle class="ring-value" id="scoreArc" cx="70" cy="70" r="54" />
+                  </svg>
+                  <strong id="overallScore">82</strong>
+                  <span>综合评分</span>
+                </div>
+              </article>
+
+              <article class="summary-card advice-card">
+                <h2>投资建议</h2>
+                <strong id="adviceTitle">积极关注</strong>
+                <p id="adviceText">适合中长期观察，建议分批跟踪，不追高。</p>
+                <ul class="advice-list">
+                  <li>
+                    <span class="status-dot positive"></span>
+                    <span id="upsideText">上行空间：12% - 18%</span>
+                  </li>
+                  <li>
+                    <span class="status-dot neutral"></span>
+                    <span id="positionText">仓位建议：轻仓试探或等待回调</span>
+                  </li>
+                  <li>
+                    <span class="status-dot warning"></span>
+                    <span id="riskText">风险提示：若跌破关键支撑，需降低仓位</span>
+                  </li>
+                </ul>
+              </article>
+            </div>
+
+            <section class="factor-grid" id="factors" aria-label="因子评分">
+              <article class="factor-card">
+                <div class="factor-head">
+                  <h3>趋势动能</h3>
+                  <span id="momentumTag" class="tag strong">偏强</span>
+                </div>
+                <strong><span id="momentumScore">75</span><small>/100</small></strong>
+                <svg class="sparkline" id="momentumSpark" viewBox="0 0 220 70" aria-hidden="true"></svg>
+                <p id="momentumText">股价位于上升趋势，均线多头排列。</p>
+              </article>
+              <article class="factor-card">
+                <div class="factor-head">
+                  <h3>估值水平</h3>
+                  <span id="valuationTag" class="tag fair">合理</span>
+                </div>
+                <strong><span id="valuationScore">68</span><small>/100</small></strong>
+                <div class="valuation-bar" aria-hidden="true">
+                  <span></span>
+                  <i id="valuationMarker"></i>
+                </div>
+                <p id="valuationText">PE 与 PB 处于历史中性区域，估值压力可控。</p>
+              </article>
+              <article class="factor-card">
+                <div class="factor-head">
+                  <h3>基本面</h3>
+                  <span id="fundamentalTag" class="tag strong">优秀</span>
+                </div>
+                <strong><span id="fundamentalScore">88</span><small>/100</small></strong>
+                <div class="bar-chart" id="fundamentalBars" aria-hidden="true"></div>
+                <p id="fundamentalText">盈利质量较好，现金流和 ROE 有支撑。</p>
+              </article>
+              <article class="factor-card">
+                <div class="factor-head">
+                  <h3>资金面</h3>
+                  <span id="capitalTag" class="tag strong">偏强</span>
+                </div>
+                <strong><span id="capitalScore">70</span><small>/100</small></strong>
+                <div class="flow-chart" id="capitalFlows" aria-hidden="true"></div>
+                <p id="capitalText">主力资金波动流入，筹码结构相对稳定。</p>
+              </article>
+              <article class="factor-card">
+                <div class="factor-head">
+                  <h3>市场情绪</h3>
+                  <span id="sentimentTag" class="tag watch">中性</span>
+                </div>
+                <strong><span id="sentimentScore">58</span><small>/100</small></strong>
+                <svg class="sparkline amber" id="sentimentSpark" viewBox="0 0 220 70" aria-hidden="true"></svg>
+                <p id="sentimentText">情绪温和，需关注量能与板块轮动。</p>
+              </article>
+            </section>
+
+            <section class="lower-grid">
+              <article class="metrics-card">
+                <div class="section-title">
+                  <h2>关键因子概览</h2>
+                  <span>公开指标 / 模型估算</span>
+                </div>
+                <div class="metric-table" id="metricTable"></div>
+              </article>
+
+              <article class="history-card" id="history">
+                <div class="section-title">
+                  <h2>最近分析记录</h2>
+                  <button class="link-button" id="resetHistory" type="button">重置</button>
+                </div>
+                <div class="history-table" id="historyTable"></div>
+              </article>
+            </section>
+          </section>
+        </section>
+      </main>
+
+      <footer class="footer" id="disclaimer">
+        <span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8h.01M11 11h1v5h1" />
+          </svg>
+          风险提示：本页面基于样本数据与模型估算生成研究辅助信息，无法保证未来收益。市场有风险，投资需谨慎。
+        </span>
+        <strong>仅供研究参考，不构成投资建议。</strong>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
